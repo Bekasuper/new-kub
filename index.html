@@ -1,0 +1,2703 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Кубик Рубика 3×3 — Умный пошаговый тренажёр с решателем</title>
+  <meta name="description" content="Интерактивный 3D/2D тренажёр сборки кубика Рубика 3×3 для взрослых новичков с реальным математическим решателем, разбивкой на 7 этапов, раскраской реального кубика и тренажёром базовых приёмов." />
+  <style>
+    :root {
+      --bg-page: #0f172a;
+      --bg-panel: #162033;
+      --bg-card: #1e293b;
+      --bg-well: #0b1220;
+      --border: #334155;
+      --border-soft: #263449;
+      --text-main: #f8fafc;
+      --text-body: #cbd5e1;
+      --text-muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --gold: #ffd500;
+      --green: #16a34a;
+      --red: #e11d48;
+      --orange: #ff6b00;
+      --blue: #0284c7;
+      --white: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: inherit;
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    /* Header */
+    .topbar {
+      background-color: #0b1220;
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      white-space: nowrap;
+    }
+
+    .mode-tabs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-panel);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .mode-tab {
+      padding: 8px 14px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-body);
+      white-space: nowrap;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .mode-tab:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .mode-tab.active {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-ghost {
+      padding: 8px 13px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .btn-ghost:hover:not(:disabled) {
+      background: #283548;
+      border-color: #475569;
+    }
+
+    .btn-ghost:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      padding: 9px 15px;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-gold {
+      padding: 10px 16px;
+      border-radius: 8px;
+      background: var(--gold);
+      color: #0f172a;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: filter 0.15s ease;
+    }
+
+    .btn-gold:hover:not(:disabled) {
+      filter: brightness(0.95);
+    }
+
+    .btn-gold:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-emerald {
+      padding: 10px 16px;
+      border-radius: 8px;
+      background: var(--green);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: filter 0.15s ease;
+    }
+
+    .btn-emerald:hover:not(:disabled) {
+      filter: brightness(1.08);
+    }
+
+    .btn-emerald:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* Main Layout */
+    .workspace {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 18px 20px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(400px, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    @media (max-width: 1060px) {
+      .workspace {
+        grid-template-columns: 1fr;
+        padding: 12px;
+      }
+    }
+
+    .panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--border-soft);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .panel-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 0;
+    }
+
+    .meta-line {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Cube Stage */
+    .cube-stage-wrap {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .canvas-box {
+      position: relative;
+      background: radial-gradient(circle at 50% 42%, #24324a 0%, #131c2e 68%, #0b1220 100%);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #cubeCanvas {
+      width: 100%;
+      height: 410px;
+      display: block;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    #cubeCanvas:active {
+      cursor: grabbing;
+    }
+
+    .active-cue-bar {
+      width: 100%;
+      padding: 11px 16px;
+      background: #0b1220;
+      border-top: 1px solid var(--border-soft);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .cue-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .cue-arrow-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 42px;
+      height: 30px;
+      padding: 0 8px;
+      border-radius: 6px;
+      background: var(--gold);
+      color: #0f172a;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .view-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .camera-presets {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    @media (max-width: 520px) {
+      .camera-presets {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .preset-btn {
+      padding: 9px 12px;
+      border-radius: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      text-align: center;
+      transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .preset-btn:hover {
+      background: #2b3b54;
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    .preset-btn.active {
+      background: #1d4ed8;
+      border-color: #60a5fa;
+      color: #ffffff;
+    }
+
+    .preset-btn.flipped-white {
+      background: rgba(255, 213, 0, 0.14);
+      border-color: var(--gold);
+      color: #fef08a;
+    }
+
+    /* 2D Unfolded Net */
+    .net-box {
+      background: var(--bg-well);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .net-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .net-grid {
+      display: grid;
+      grid-template-columns: repeat(4, auto);
+      gap: 10px;
+      justify-content: center;
+      align-items: start;
+    }
+
+    @media (max-width: 540px) {
+      .net-grid {
+        gap: 6px;
+      }
+    }
+
+    .face-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .face-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-body);
+      letter-spacing: 0.03em;
+    }
+
+    .face-3x3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3px;
+      padding: 4px;
+      background: #04060a;
+      border: 2px solid #04060a;
+      border-radius: 6px;
+    }
+
+    .net-tile {
+      width: 24px;
+      height: 24px;
+      border-radius: 3px;
+      border: 2px solid #04060a;
+      position: relative;
+      transition: transform 0.1s ease;
+    }
+
+    .paint-mode .net-tile {
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+    }
+
+    .paint-mode .net-tile:hover:not(.center-locked) {
+      transform: scale(1.08);
+      border-color: #ffffff;
+    }
+
+    .net-tile.center-locked {
+      cursor: not-allowed;
+    }
+
+    .net-tile.center-locked::after {
+      content: "●";
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      color: rgba(15, 23, 42, 0.45);
+      pointer-events: none;
+    }
+
+    @media (max-width: 540px) {
+      .net-tile {
+        width: 19px;
+        height: 19px;
+      }
+      .paint-mode .net-tile {
+        width: 23px;
+        height: 23px;
+      }
+    }
+
+    /* Manual turns compact grid */
+    .manual-turns {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    @media (max-width: 620px) {
+      .manual-turns {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    .mini-move-btn {
+      height: 38px;
+      border-radius: 7px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      transition: background-color 0.14s ease, border-color 0.14s ease;
+    }
+
+    .mini-move-btn:hover:not(:disabled) {
+      background: #2b3b54;
+      border-color: var(--accent);
+    }
+
+    .mini-move-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* Right Panel: Solver Player */
+    .player-wrap {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .stage-tabs {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .stage-pill {
+      height: 40px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-body);
+      font-size: 13px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.14s ease, border-color 0.14s ease;
+    }
+
+    .stage-pill:hover {
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    .stage-pill.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    .stage-pill.done {
+      border-color: var(--green);
+      background: rgba(22, 163, 74, 0.16);
+      color: #86efac;
+    }
+
+    .stage-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 0;
+      line-height: 1.25;
+    }
+
+    .stage-kicker {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 3px;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card-label {
+      font-size: 12px;
+      font-weight: 800;
+      color: #93c5fd;
+    }
+
+    .card-text {
+      font-size: 14.5px;
+      color: var(--text-main);
+      margin: 0;
+      line-height: 1.55;
+    }
+
+    /* Move chips list for current stage */
+    .moves-list-box {
+      background: var(--bg-well);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .moves-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-height: 150px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .move-chip {
+      min-width: 34px;
+      height: 32px;
+      padding: 0 9px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-body);
+      transition: background-color 0.12s ease, border-color 0.12s ease;
+    }
+
+    .move-chip:hover {
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    .move-chip.done {
+      background: rgba(22, 163, 74, 0.22);
+      border-color: var(--green);
+      color: #86efac;
+    }
+
+    .move-chip.current {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #0f172a;
+      font-weight: 800;
+    }
+
+    .current-move-spoken {
+      background: #172554;
+      border: 1px solid #3b82f6;
+      border-radius: 9px;
+      padding: 11px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .spoken-text {
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .spoken-sub {
+      font-size: 12px;
+      color: #bfdbfe;
+      margin-top: 2px;
+    }
+
+    .player-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .solved-banner {
+      background: rgba(22, 163, 74, 0.18);
+      border: 1px solid var(--green);
+      border-radius: 10px;
+      padding: 14px 16px;
+      color: #dcfce7;
+      font-size: 14.5px;
+      font-weight: 700;
+    }
+
+    /* Paint Panel */
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    @media (max-width: 480px) {
+      .palette-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .swatch-btn {
+      padding: 10px 12px;
+      border-radius: 9px;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .swatch-btn.selected {
+      border-color: var(--gold);
+      background: #283548;
+    }
+
+    .swatch-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 2px solid #04060a;
+      flex-shrink: 0;
+    }
+
+    .count-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: var(--bg-well);
+      border: 1px solid var(--border-soft);
+    }
+
+    .count-ok { color: #4ade80; font-weight: 700; }
+    .count-warn { color: #fbbf24; font-weight: 700; }
+
+    .error-box {
+      background: rgba(225, 29, 72, 0.15);
+      border: 1px solid #f43f5e;
+      border-radius: 9px;
+      padding: 12px 14px;
+      font-size: 13.5px;
+      color: #fecdd3;
+      line-height: 1.5;
+    }
+
+    /* Skills / Drills Panel */
+    .skill-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .skill-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .skill-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .skill-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Кубик Рубика 3×3 · Решатель для новичков</div>
+
+    <div class="mode-tabs" role="tablist" aria-label="Разделы">
+      <button type="button" id="tabSolve" class="mode-tab active" role="tab" aria-selected="true">
+        Пошаговый плеер (7 этапов)
+      </button>
+      <button type="button" id="tabPaint" class="mode-tab" role="tab" aria-selected="false">
+        Задать цвета как у меня в руках
+      </button>
+      <button type="button" id="tabSkills" class="mode-tab" role="tab" aria-selected="false">
+        Тренажёр приёмов (База)
+      </button>
+    </div>
+
+    <div class="top-actions">
+      <button type="button" id="btnScrambleSolve" class="btn-primary">
+        Перемешать и решить
+      </button>
+      <button type="button" id="btnResetSolved" class="btn-ghost">
+        Сбросить в собранный
+      </button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <!-- LEFT: 3D Cube + 2D Net + Manual Turns -->
+    <section class="panel" aria-label="3D и 2D модель кубика">
+      <div class="panel-head">
+        <h2 class="panel-title">Интерактивный кубик</h2>
+        <div class="meta-line" id="cubeOrientationMeta">Сверху: Жёлтый · Спереди: Красный · Справа: Зелёный · Крутите 360° мышкой или пальцем</div>
+      </div>
+
+      <div class="cube-stage-wrap">
+        <div class="canvas-box">
+          <canvas id="cubeCanvas" width="700" height="410"></canvas>
+          <div class="active-cue-bar">
+            <div class="cue-main">
+              <span id="cueBadge" class="cue-arrow-badge">3D</span>
+              <span id="cueText">Кубик перемешан — выберите шаг в плеере справа.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="camera-presets" role="group" aria-label="Быстрая смена ракурса 3D-кубика">
+          <button type="button" id="btnViewFrontTop" class="preset-btn active" title="Стандартный ракурс: видны Верх, Перед и Право">
+            Вид спереди-сверху
+          </button>
+          <button type="button" id="btnViewBottom" class="preset-btn" title="Наклонить кубик, чтобы увидеть Дно, Перед и Право">
+            Заглянуть снизу
+          </button>
+          <button type="button" id="btnViewBack" class="preset-btn" title="Развернуть на 180°, чтобы видеть Заднюю и Левую стороны">
+            Повернуть задом
+          </button>
+          <button type="button" id="btnFlipTopColor" class="preset-btn" title="Перехватить кубик в руках вверх дном">
+            Перевернуть белым вверх
+          </button>
+        </div>
+
+        <div id="manualTurnsSection">
+          <div class="view-bar" style="margin-bottom: 8px;">
+            <span class="meta-line" style="font-weight: 700; color: var(--text-body);">
+              Ручные повороты граней (если хочется покрутить самому):
+            </span>
+            <button type="button" id="btnSolveCurrent" class="btn-ghost" style="padding: 5px 11px; font-size: 12px;">
+              Построить решение отсюда
+            </button>
+          </div>
+          <div class="manual-turns">
+            <button type="button" class="mini-move-btn" data-move="R" title="Правую от себя">R ↑</button>
+            <button type="button" class="mini-move-btn" data-move="R'" title="Правую на себя">R' ↓</button>
+            <button type="button" class="mini-move-btn" data-move="U" title="Крышку влево">U ←</button>
+            <button type="button" class="mini-move-btn" data-move="U'" title="Крышку вправо">U' →</button>
+            <button type="button" class="mini-move-btn" data-move="F" title="Переднюю по часовой">F ↻</button>
+            <button type="button" class="mini-move-btn" data-move="F'" title="Переднюю против">F' ↺</button>
+            <button type="button" class="mini-move-btn" data-move="L" title="Левую на себя">L ↓</button>
+            <button type="button" class="mini-move-btn" data-move="L'" title="Левую от себя">L' ↑</button>
+            <button type="button" class="mini-move-btn" data-move="D" title="Низ вправо">D →</button>
+            <button type="button" class="mini-move-btn" data-move="D'" title="Низ влево">D' ←</button>
+            <button type="button" class="mini-move-btn" data-move="B" title="Заднюю влево">B ↺</button>
+            <button type="button" class="mini-move-btn" data-move="B'" title="Заднюю вправо">B' ↻</button>
+          </div>
+        </div>
+
+        <div id="netContainer" class="net-box">
+          <div class="net-header">
+            <span class="panel-title" style="font-size: 13px;">
+              Развёртка 6 сторон (ВЕРХ, ЛЕВО, ПЕРЕД, ПРАВО, ЗАД, НИЗ)
+            </span>
+            <span id="netPaintHint" class="meta-line hidden">
+              Центры с точкой зафиксированы · Кликайте по любым другим квадратикам!
+            </span>
+          </div>
+          <div id="netGrid" class="net-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: 1) Step Player  2) Custom Paint  3) Skills Trainer -->
+    <aside class="panel" aria-label="Панель управления сборкой">
+      <!-- PANEL 1: 7-STAGE SOLUTION PLAYER -->
+      <div id="panelSolve">
+        <div class="panel-head">
+          <h2 class="panel-title">Пошаговый плеер сборки</h2>
+          <div class="meta-line" id="totalProgressLabel">Ход 0 из 0</div>
+        </div>
+
+        <div class="player-wrap">
+          <div class="stage-tabs" id="stageTabs"></div>
+
+          <div>
+            <div class="stage-kicker" id="stageKicker">Этап 1 из 7</div>
+            <h1 class="stage-title" id="stageTitle">Белая ромашка и Белый крест</h1>
+          </div>
+
+          <div class="info-card">
+            <div class="card-label">Зачем мы это делаем (простыми словами)</div>
+            <p class="card-text" id="stageExplain"></p>
+          </div>
+
+          <div id="solvedBanner" class="solved-banner hidden">
+            Поздравляем! Кубик полностью собран! Нажмите «Перемешать и решить» для новой тренировки или задайте свой кубик.
+          </div>
+
+          <div class="moves-list-box">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+              <span class="card-label">Конкретные ходы этого этапа для вашего кубика</span>
+              <span class="meta-line" id="stageMoveCount">0 ходов</span>
+            </div>
+            <div class="moves-chips" id="stageMovesChips"></div>
+
+            <div class="current-move-spoken" id="currentMoveBox">
+              <div>
+                <div class="spoken-text" id="spokenMoveText">Нажмите «Сделать 1 шаг вперед»</div>
+                <div class="spoken-sub" id="spokenMoveSub">Кубик плавно покажет движение со стрелкой</div>
+              </div>
+              <span id="spokenMoveBadge" class="cue-arrow-badge">—</span>
+            </div>
+          </div>
+
+          <div class="player-controls">
+            <button type="button" id="btnStepBack" class="btn-ghost" style="flex: 1; justify-content: center;">
+              ← Шаг назад
+            </button>
+            <button type="button" id="btnStepForward" class="btn-gold" style="flex: 1.5; justify-content: center;">
+              Сделать 1 шаг вперед →
+            </button>
+          </div>
+
+          <div class="player-controls">
+            <button type="button" id="btnAutoPlayStage" class="btn-emerald" style="flex: 1; justify-content: center;">
+              ▶ Проиграть весь этап автоматически (1 ход/сек)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 2: CUSTOM CUBE PAINTING -->
+      <div id="panelPaint" class="hidden">
+        <div class="panel-head">
+          <h2 class="panel-title">Задать цвета как у меня в руках</h2>
+          <div class="meta-line">Центры зафиксированы</div>
+        </div>
+
+        <div class="player-wrap">
+          <p class="card-text">
+            Держите свой реальный кубик так, чтобы <strong>сверху был Жёлтый центр</strong>, а <strong>на вас смотрел Красный центр</strong> (справа — Зелёный). Выбирайте цвет и закрашивайте квадратики на развёртке или прямо на 3D-кубике.
+          </p>
+
+          <div>
+            <div class="card-label" style="margin-bottom: 8px;">1. Выберите цвет наклейки:</div>
+            <div class="palette-grid" id="paletteGrid"></div>
+          </div>
+
+          <div>
+            <div class="card-label" style="margin-bottom: 8px;">2. Счётчик цветов (каждого должно быть по 9):</div>
+            <div class="count-strip" id="colorCounts"></div>
+          </div>
+
+          <div id="paintErrorBox" class="error-box hidden"></div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button type="button" id="btnSolveCustom" class="btn-emerald" style="justify-content: center; padding: 13px 18px; font-size: 14px;">
+              ✓ Собрать этот кубик по шагам
+            </button>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button type="button" id="btnClearToCenters" class="btn-ghost" style="flex: 1; justify-content: center;">
+                Очистить в серый (оставить центры)
+              </button>
+              <button type="button" id="btnCancelPaint" class="btn-ghost" style="flex: 1; justify-content: center;">
+                Отмена
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 3: SKILLS TRAINER -->
+      <div id="panelSkills" class="hidden">
+        <div class="panel-head">
+          <h2 class="panel-title">Тренажёр приёмов (База)</h2>
+          <div class="meta-line">3 главные комбинации</div>
+        </div>
+
+        <div class="player-wrap">
+          <p class="card-text">
+            Вся сборка кубика держится всего на трёх коротких движениях. Нажмите на кнопку под любым приёмом, чтобы не спеша увидеть его на 3D-кубике со стрелками.
+          </p>
+
+          <div class="skill-card">
+            <div class="skill-head">
+              <span class="skill-title">1. Правый «Пиф-паф»</span>
+              <span class="skill-code">R → U → R' → U'</span>
+            </div>
+            <p class="card-text">
+              <strong>Зачем нужен:</strong> ставит белые углы на первый этаж (Этап 2), помогает рисовать жёлтый крест (Этап 4) и парковать правые рёбра.
+            </p>
+            <p class="meta-line">
+              Простыми словами: правую грань от себя → крышку влево → правую на себя → крышку вправо.
+            </p>
+            <div>
+              <button type="button" class="btn-gold skill-play-btn" data-skill="right_pif">
+                ▶ Показать Правый Пиф-паф
+              </button>
+            </div>
+          </div>
+
+          <div class="skill-card">
+            <div class="skill-head">
+              <span class="skill-title">2. Левый «Пиф-паф»</span>
+              <span class="skill-code">L' → U' → L → U</span>
+            </div>
+            <p class="card-text">
+              <strong>Зачем нужен:</strong> зеркальный брат правого приёма — нужен, чтобы аккуратно парковать детали в левый «карман» на среднем слое (Этап 3).
+            </p>
+            <p class="meta-line">
+              Простыми словами: левую грань от себя → крышку вправо → левую на себя → крышку влево.
+            </p>
+            <div>
+              <button type="button" class="btn-gold skill-play-btn" data-skill="left_pif">
+                ▶ Показать Левый Пиф-паф
+              </button>
+            </div>
+          </div>
+
+          <div class="skill-card">
+            <div class="skill-head">
+              <span class="skill-title">3. «Рыбка»</span>
+              <span class="skill-code">R → U → R' → U → R → U → U → R' → U</span>
+            </div>
+            <p class="card-text">
+              <strong>Зачем нужна:</strong> на Этапе 5 меняет местами боковые рёбра жёлтого креста, чтобы все 4 цвета совпали со своими центрами.
+            </p>
+            <p class="meta-line">
+              Простыми словами: вытаскиваем правую пару наверх (R U R'), отводим крышку дальше (U), поднимаем лифт (R), возвращаем крышку дважды (U U), опускаем лифт (R') и докручиваем крышку (U).
+            </p>
+            <div>
+              <button type="button" class="btn-gold skill-play-btn" data-skill="fish">
+                ▶ Показать «Рыбку»
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // =========================================================================
+      // 1. ЦВЕТА, СЛОВАРЬ ХОДОВ И ОПИСАНИЯ 7 ЭТАПОВ
+      // =========================================================================
+      const COLORS = {
+        W: { hex: '#FFFFFF', name: 'Белый' },
+        Y: { hex: '#FFD500', name: 'Жёлтый' },
+        R: { hex: '#E11D48', name: 'Красный' },
+        O: { hex: '#FF6B00', name: 'Оранжевый' },
+        B: { hex: '#0284C7', name: 'Синий' },
+        G: { hex: '#16A34A', name: 'Зелёный' },
+        X: { hex: '#475569', name: 'Пусто' },
+      };
+
+      const MOVE_DEFS = {
+        "R":  { axis: 'x', layer: 1,  dir: -1, arrow: 'R ↑',  words: 'Правую грань от себя (вверх)' },
+        "R'": { axis: 'x', layer: 1,  dir:  1, arrow: "R' ↓", words: 'Правую грань на себя (вниз)' },
+        "L":  { axis: 'x', layer: -1, dir:  1, arrow: 'L ↓',  words: 'Левую грань на себя (вниз)' },
+        "L'": { axis: 'x', layer: -1, dir: -1, arrow: "L' ↑", words: 'Левую грань от себя (вверх)' },
+        "U":  { axis: 'y', layer: 1,  dir: -1, arrow: 'U ←',  words: 'Верхнюю крышку влево (по часовой)' },
+        "U'": { axis: 'y', layer: 1,  dir:  1, arrow: "U' →", words: 'Верхнюю крышку вправо (против часовой)' },
+        "D":  { axis: 'y', layer: -1, dir:  1, arrow: 'D →',  words: 'Нижний этаж вправо' },
+        "D'": { axis: 'y', layer: -1, dir: -1, arrow: "D' ←", words: 'Нижний этаж влево' },
+        "F":  { axis: 'z', layer: 1,  dir: -1, arrow: 'F ↻',  words: 'Переднюю «дверь» по часовой (вправо)' },
+        "F'": { axis: 'z', layer: 1,  dir:  1, arrow: "F' ↺", words: 'Переднюю «дверь» против часовой (влево)' },
+        "B":  { axis: 'z', layer: -1, dir:  1, arrow: 'B ↺',  words: 'Заднюю стенку влево (по часовой сзади)' },
+        "B'": { axis: 'z', layer: -1, dir: -1, arrow: "B' ↻", words: 'Заднюю стенку вправо (против часовой сзади)' },
+      };
+
+      const INVERSE_MOVE = {
+        "R": "R'", "R'": "R",
+        "L": "L'", "L'": "L",
+        "U": "U'", "U'": "U",
+        "D": "D'", "D'": "D",
+        "F": "F'", "F'": "F",
+        "B": "B'", "B'": "B",
+      };
+
+      const STAGE_META = [
+        {
+          id: 1,
+          short: 'Крест',
+          title: '1. Белая ромашка и Белый крест',
+          explain: 'Сначала поднимаем 4 белых ребра «на лифте» наверх к жёлтому центру (получается белая ромашка), а потом совмещаем каждый лепесток со своим боковым центром и спускаем вниз — получается ровный белый крест.',
+        },
+        {
+          id: 2,
+          short: 'Углы 1',
+          title: '2. Белые углы (Первый слой)',
+          explain: 'Подводим каждый белый угол крышкой к своей «квартире» между нужными центрами и усаживаем его вниз приёмом «Пиф-паф» (Правую от себя, крышку влево, правую на себя, крышку вправо). Получается белое дно и первый пояс!',
+        },
+        {
+          id: 3,
+          short: 'Слой 2',
+          title: '3. Второй (средний) слой',
+          explain: 'Находим наверху рёбра без жёлтого цвета, подводим к своему центру буквой «Т» и «прячем в карман» в сторону от нужного гаража — затем двумя Пиф-пафами аккуратно паркуем деталь на средний этаж.',
+        },
+        {
+          id: 4,
+          short: 'Жёлт. ★',
+          title: '4. Жёлтый крест наверху',
+          explain: 'Открываем переднюю «дверь» (F), делаем один Пиф-паф (R U R\' U\') и закрываем дверь обратно (F\'). Так из точки, галочки или палки сверху выстраивается жёлтый крест.',
+        },
+        {
+          id: 5,
+          short: 'Бока ★',
+          title: '5. Правильный жёлтый крест (совпадение боков)',
+          explain: 'Крутим крышку, чтобы совпали хотя бы два ребра с боковыми центрами, и применяем «Рыбку» — все 4 боковых цвета жёлтого креста встают ровно над своими центрами.',
+        },
+        {
+          id: 6,
+          short: 'Места',
+          title: '6. Расстановка жёлтых углов по местам',
+          explain: 'Оставляя один верный угол перед собой справа, запускаем «карусель» для трёх остальных углов (U R U\' L\' U R\' U\' L), пока каждый верхний угол не окажется между своими тремя центрами.',
+        },
+        {
+          id: 7,
+          short: 'Финал!',
+          title: '7. Разворот жёлтых углов (Финал!)',
+          explain: 'Держим кубик так, чтобы неразвёрнутый угол стоял справа-спереди-сверху, и крутим «нижний Пиф-паф» (R\' D\' R D), пока угол не встанет жёлтым вверх. Потом прокручиваем только крышку (U) для следующего угла — и кубик полностью собран!',
+        },
+      ];
+
+      // =========================================================================
+      // 2. ЯДРО МОДЕЛИ КУБИКА И ГЕОМЕТРИИ
+      // =========================================================================
+      const FACE_NORMALS = {
+        px: [1, 0, 0],
+        nx: [-1, 0, 0],
+        py: [0, 1, 0],
+        ny: [0, -1, 0],
+        pz: [0, 0, 1],
+        nz: [0, 0, -1],
+      };
+
+      function normalToKey(nx, ny, nz) {
+        if (nx === 1) return 'px';
+        if (nx === -1) return 'nx';
+        if (ny === 1) return 'py';
+        if (ny === -1) return 'ny';
+        if (nz === 1) return 'pz';
+        return 'nz';
+      }
+
+      function rotateVec90(vx, vy, vz, axis, dirSign) {
+        if (axis === 'x') return [vx, -dirSign * vz, dirSign * vy];
+        if (axis === 'y') return [dirSign * vz, vy, -dirSign * vx];
+        return [-dirSign * vy, dirSign * vx, vz];
+      }
+
+      const FACE_ROT = [
+        { F: 'F', R: 'R', B: 'B', L: 'L' },
+        { F: 'R', R: 'B', B: 'L', L: 'F' },
+        { F: 'B', R: 'L', B: 'F', L: 'R' },
+        { F: 'L', R: 'F', B: 'R', L: 'B' },
+      ];
+
+      function remapMove(m, rotIdx) {
+        const base = m[0];
+        const prime = m.slice(1);
+        const mapped = FACE_ROT[rotIdx][base] || base;
+        return mapped + prime;
+      }
+
+      function createSolvedCubies() {
+        const list = [];
+        for (let x = -1; x <= 1; x++) {
+          for (let y = -1; y <= 1; y++) {
+            for (let z = -1; z <= 1; z++) {
+              if (x === 0 && y === 0 && z === 0) continue;
+              const faces = {};
+              if (x === 1) faces.px = 'G';
+              if (x === -1) faces.nx = 'B';
+              if (y === 1) faces.py = 'Y';
+              if (y === -1) faces.ny = 'W';
+              if (z === 1) faces.pz = 'R';
+              if (z === -1) faces.nz = 'O';
+              list.push({ x, y, z, faces });
+            }
+          }
+        }
+        return list;
+      }
+
+      function cloneCubies(src) {
+        return src.map(c => ({ x: c.x, y: c.y, z: c.z, faces: Object.assign({}, c.faces) }));
+      }
+
+      function applyMoveToCubies(cubieList, moveCode) {
+        const d = MOVE_DEFS[moveCode];
+        if (!d) return;
+        for (const c of cubieList) {
+          if (c[d.axis] !== d.layer) continue;
+          const [nx, ny, nz] = rotateVec90(c.x, c.y, c.z, d.axis, d.dir);
+          c.x = nx;
+          c.y = ny;
+          c.z = nz;
+          const nf = {};
+          for (const k of Object.keys(c.faces)) {
+            const v = FACE_NORMALS[k];
+            const [rx, ry, rz] = rotateVec90(v[0], v[1], v[2], d.axis, d.dir);
+            nf[normalToKey(rx, ry, rz)] = c.faces[k];
+          }
+          c.faces = nf;
+        }
+      }
+
+      class SimCube {
+        constructor(cubies) {
+          this.cubies = cubies ? cloneCubies(cubies) : createSolvedCubies();
+          this.log = [];
+        }
+        move(m) {
+          applyMoveToCubies(this.cubies, m);
+          this.log.push(m);
+        }
+        seq(arr, rot = 0) {
+          for (const m of arr) this.move(remapMove(m, rot));
+        }
+        at(x, y, z) {
+          return this.cubies.find(c => c.x === x && c.y === y && c.z === z);
+        }
+        findPiece(cols) {
+          const s = [...cols].sort().join('');
+          return this.cubies.find(c => Object.values(c.faces).sort().join('') === s);
+        }
+        isSolved() {
+          for (const c of this.cubies) {
+            if (c.x === 1 && c.faces.px !== 'G') return false;
+            if (c.x === -1 && c.faces.nx !== 'B') return false;
+            if (c.y === 1 && c.faces.py !== 'Y') return false;
+            if (c.y === -1 && c.faces.ny !== 'W') return false;
+            if (c.z === 1 && c.faces.pz !== 'R') return false;
+            if (c.z === -1 && c.faces.nz !== 'O') return false;
+          }
+          return true;
+        }
+      }
+
+      // =========================================================================
+      // 3. МАТЕМАТИЧЕСКИЙ РЕШАТЕЛЬ (BEGINNER'S METHOD — 7 ЭТАПОВ) И ВАЛИДАТОР
+      // =========================================================================
+      const SIDE_INFO = [
+        { face: 'F', color: 'R', x: 0,  z: 1,  fKey: 'pz', cw: 'F', ccw: "F'" },
+        { face: 'R', color: 'G', x: 1,  z: 0,  fKey: 'px', cw: 'R', ccw: "R'" },
+        { face: 'B', color: 'O', x: 0,  z: -1, fKey: 'nz', cw: 'B', ccw: "B'" },
+        { face: 'L', color: 'B', x: -1, z: 0,  fKey: 'nx', cw: 'L', ccw: "L'" },
+      ];
+
+      const CORNER_SLOTS = [
+        { x: 1,  z: 1,  colors: ['W', 'R', 'G'], sideKeys: ['pz', 'px'] },
+        { x: 1,  z: -1, colors: ['W', 'G', 'O'], sideKeys: ['px', 'nz'] },
+        { x: -1, z: -1, colors: ['W', 'O', 'B'], sideKeys: ['nz', 'nx'] },
+        { x: -1, z: 1,  colors: ['W', 'B', 'R'], sideKeys: ['nx', 'pz'] },
+      ];
+
+      const MIDDLE_SLOTS = [
+        { x: 1,  z: 1,  colors: ['R', 'G'] },
+        { x: 1,  z: -1, colors: ['G', 'O'] },
+        { x: -1, z: -1, colors: ['O', 'B'] },
+        { x: -1, z: 1,  colors: ['B', 'R'] },
+      ];
+
+      function simplifyMoves(rawMoves) {
+        // Упрощает подряд идущие ходы одной грани: X + X' -> ничего, X + X + X -> X'
+        const stack = [];
+        for (const m of rawMoves) {
+          stack.push(m);
+          while (stack.length >= 2) {
+            const a = stack[stack.length - 2];
+            const b = stack[stack.length - 1];
+            if (a[0] !== b[0]) break;
+            if (a !== b) {
+              // X и X' взаимно уничтожаются
+              stack.pop();
+              stack.pop();
+            } else if (stack.length >= 3 && stack[stack.length - 3] === a) {
+              // X + X + X -> X'
+              stack.pop();
+              stack.pop();
+              stack.pop();
+              stack.push(a.length === 1 ? a + "'" : a[0]);
+            } else {
+              break;
+            }
+          }
+        }
+        return stack;
+      }
+
+      function solveBeginner(sourceCubies) {
+        const cube = new SimCube(sourceCubies);
+        const rawStages = [];
+
+        const runStage = (metaIdx, fn) => {
+          const start = cube.log.length;
+          fn();
+          const moves = simplifyMoves(cube.log.slice(start));
+          rawStages.push({
+            meta: STAGE_META[metaIdx],
+            moves,
+          });
+        };
+
+        // Этап 1: Белая ромашка + Белый крест
+        runStage(0, () => {
+          const whiteEdges = [['W', 'R'], ['W', 'G'], ['W', 'O'], ['W', 'B']];
+          const freeTopSlot = (tx, tz) => {
+            let guard = 0;
+            while (cube.at(tx, 1, tz).faces.py === 'W' && guard++ < 4) {
+              cube.move('U');
+            }
+          };
+
+          for (const pair of whiteEdges) {
+            let guard = 0;
+            while (guard++ < 12) {
+              const p = cube.findPiece(pair);
+              if (!p) break;
+              if (p.y === 1 && p.faces.py === 'W') break;
+              if (p.y === 1 && p.faces.py !== 'W') {
+                const si = SIDE_INFO.find(s => s.x === p.x && s.z === p.z);
+                cube.move(si.cw);
+              } else if (p.y === 0) {
+                const nonWKey = Object.keys(p.faces).find(k => p.faces[k] !== 'W');
+                const sideMoveFace = SIDE_INFO.find(s => s.fKey === nonWKey);
+                freeTopSlot(sideMoveFace.x, sideMoveFace.z);
+                const test = new SimCube(cube.cubies);
+                test.move(sideMoveFace.cw);
+                const tp = test.findPiece(pair);
+                if (tp && tp.y === 1 && tp.faces.py === 'W') cube.move(sideMoveFace.cw);
+                else cube.move(sideMoveFace.ccw);
+              } else {
+                const si = SIDE_INFO.find(s => s.x === p.x && s.z === p.z);
+                freeTopSlot(si.x, si.z);
+                if (p.faces.ny === 'W') {
+                  cube.move(si.cw);
+                  cube.move(si.cw);
+                } else {
+                  cube.move(si.cw);
+                }
+              }
+            }
+          }
+
+          for (let done = 0; done < 4; done++) {
+            for (let r = 0; r < 4; r++) {
+              const petalSide = SIDE_INFO.find(s => {
+                const c = cube.at(s.x, 1, s.z);
+                return c.faces.py === 'W' && c.faces[s.fKey] === s.color;
+              });
+              if (petalSide) {
+                cube.move(petalSide.cw);
+                cube.move(petalSide.cw);
+                break;
+              }
+              cube.move('U');
+            }
+          }
+        });
+
+        // Этап 2: Белые углы (Первый слой)
+        runStage(1, () => {
+          for (let sIdx = 0; sIdx < 4; sIdx++) {
+            const slot = CORNER_SLOTS[sIdx];
+            const isCornerSolved = () => {
+              const c = cube.at(slot.x, -1, slot.z);
+              return (
+                c.faces.ny === 'W' &&
+                c.faces[slot.sideKeys[0]] === SIDE_INFO[sIdx].color &&
+                c.faces[slot.sideKeys[1]] === SIDE_INFO[(sIdx + 1) % 4].color
+              );
+            };
+            if (isCornerSolved()) continue;
+
+            let p = cube.findPiece(slot.colors);
+            if (!p) continue;
+            if (p.y === -1) {
+              const curSlot = CORNER_SLOTS.findIndex(cs => cs.x === p.x && cs.z === p.z);
+              cube.seq(['R', 'U', "R'", "U'"], curSlot);
+            }
+
+            let g = 0;
+            while (g++ < 4) {
+              p = cube.findPiece(slot.colors);
+              if (p.y === 1 && p.x === slot.x && p.z === slot.z) break;
+              cube.move('U');
+            }
+
+            g = 0;
+            while (!isCornerSolved() && g++ < 6) {
+              cube.seq(['R', 'U', "R'", "U'"], sIdx);
+            }
+          }
+        });
+
+        // Этап 3: Второй (средний) слой
+        runStage(2, () => {
+          const isMiddleSolved = idx => {
+            const ms = MIDDLE_SLOTS[idx];
+            const c = cube.at(ms.x, 0, ms.z);
+            return (
+              c.faces[SIDE_INFO[idx].fKey] === SIDE_INFO[idx].color &&
+              c.faces[SIDE_INFO[(idx + 1) % 4].fKey] === SIDE_INFO[(idx + 1) % 4].color
+            );
+          };
+
+          let guard = 0;
+          while (guard++ < 16) {
+            if ([0, 1, 2, 3].every(isMiddleSolved)) break;
+            const topEdge = SIDE_INFO.map((s, i) => ({ s, i, c: cube.at(s.x, 1, s.z) })).find(
+              o => o.c.faces.py !== 'Y' && o.c.faces[o.s.fKey] !== 'Y'
+            );
+            if (topEdge) {
+              const targetColor = topEdge.c.faces[topEdge.s.fKey];
+              const targetFaceIdx = SIDE_INFO.findIndex(s => s.color === targetColor);
+              if (targetFaceIdx < 0) break;
+
+              let uGuard = 0;
+              while (uGuard++ < 4) {
+                const cur = cube.at(SIDE_INFO[targetFaceIdx].x, 1, SIDE_INFO[targetFaceIdx].z);
+                if (cur.faces[SIDE_INFO[targetFaceIdx].fKey] === targetColor && cur.faces.py !== 'Y') break;
+                cube.move('U');
+              }
+
+              const aligned = cube.at(SIDE_INFO[targetFaceIdx].x, 1, SIDE_INFO[targetFaceIdx].z);
+              const topColor = aligned.faces.py;
+              const rightColor = SIDE_INFO[(targetFaceIdx + 1) % 4].color;
+              if (topColor === rightColor) {
+                cube.seq(['U', 'R', "U'", "R'", "U'", "F'", 'U', 'F'], targetFaceIdx);
+              } else {
+                cube.seq(["U'", "L'", 'U', 'L', 'U', 'F', "U'", "F'"], targetFaceIdx);
+              }
+            } else {
+              const badIdx = [0, 1, 2, 3].find(i => !isMiddleSolved(i));
+              if (badIdx === undefined) break;
+              cube.seq(['U', 'R', "U'", "R'", "U'", "F'", 'U', 'F'], badIdx);
+            }
+          }
+        });
+
+        // Этап 4: Жёлтый крест наверху
+        runStage(3, () => {
+          let g = 0;
+          while (g++ < 5) {
+            const yFlags = SIDE_INFO.map(s => cube.at(s.x, 1, s.z).faces.py === 'Y');
+            const count = yFlags.filter(Boolean).length;
+            if (count === 4) break;
+            if (count === 0) {
+              cube.seq(['F', 'R', 'U', "R'", "U'", "F'"], 0);
+            } else if (count === 2) {
+              if (yFlags[0] && yFlags[2]) {
+                cube.move('U');
+                cube.seq(['F', 'R', 'U', "R'", "U'", "F'"], 0);
+              } else if (yFlags[1] && yFlags[3]) {
+                cube.seq(['F', 'R', 'U', "R'", "U'", "F'"], 0);
+              } else {
+                let ug = 0;
+                while (!(cube.at(0, 1, -1).faces.py === 'Y' && cube.at(-1, 1, 0).faces.py === 'Y') && ug++ < 4) {
+                  cube.move('U');
+                }
+                cube.seq(['F', 'R', 'U', "R'", "U'", "F'"], 0);
+              }
+            } else {
+              break;
+            }
+          }
+        });
+
+        // Этап 5: Правильный жёлтый крест (совпадение боков)
+        runStage(4, () => {
+          const getMatches = () => SIDE_INFO.map(s => cube.at(s.x, 1, s.z).faces[s.fKey] === s.color);
+          let g = 0;
+          while (g++ < 6) {
+            let bestU = 0;
+            let bestCount = -1;
+            for (let u = 0; u < 4; u++) {
+              const t = new SimCube(cube.cubies);
+              for (let k = 0; k < u; k++) t.move('U');
+              const cnt = SIDE_INFO.filter(s => t.at(s.x, 1, s.z).faces[s.fKey] === s.color).length;
+              if (cnt > bestCount) {
+                bestCount = cnt;
+                bestU = u;
+              }
+            }
+            for (let k = 0; k < bestU; k++) cube.move('U');
+            const m = getMatches();
+            const cnt = m.filter(Boolean).length;
+            if (cnt === 4) break;
+            if (cnt === 2) {
+              if ((m[0] && m[2]) || (m[1] && m[3])) {
+                cube.seq(['R', 'U', "R'", 'U', 'R', 'U', 'U', "R'", 'U'], 0);
+              } else {
+                let rot = 0;
+                for (let i = 0; i < 4; i++) {
+                  if (m[(i + 1) % 4] && m[(i + 2) % 4]) {
+                    rot = i;
+                    break;
+                  }
+                }
+                cube.seq(['R', 'U', "R'", 'U', 'R', 'U', 'U', "R'", 'U'], rot);
+              }
+            } else {
+              break;
+            }
+          }
+        });
+
+        // Этап 6: Расстановка жёлтых углов по местам
+        runStage(5, () => {
+          const cornerHomeCorrect = idx => {
+            const slot = CORNER_SLOTS[idx];
+            const c = cube.at(slot.x, 1, slot.z);
+            const want = ['Y', SIDE_INFO[idx].color, SIDE_INFO[(idx + 1) % 4].color].sort().join('');
+            return Object.values(c.faces).sort().join('') === want;
+          };
+          let g = 0;
+          while (g++ < 6) {
+            const ok = [0, 1, 2, 3].map(cornerHomeCorrect);
+            const cnt = ok.filter(Boolean).length;
+            if (cnt === 4) break;
+            const fixedIdx = ok.findIndex(Boolean);
+            const rot = fixedIdx >= 0 ? fixedIdx : 0;
+            cube.seq(['U', 'R', "U'", "L'", 'U', "R'", "U'", 'L'], rot);
+          }
+        });
+
+        // Этап 7: Разворот жёлтых углов (Финал!)
+        runStage(6, () => {
+          for (let i = 0; i < 4; i++) {
+            let g = 0;
+            while (cube.at(1, 1, 1).faces.py !== 'Y' && g++ < 6) {
+              cube.seq(["R'", "D'", 'R', 'D'], 0);
+            }
+            cube.move('U');
+          }
+          let ug = 0;
+          while (cube.at(0, 1, 1).faces.pz !== 'R' && ug++ < 4) {
+            cube.move('U');
+          }
+        });
+
+        return {
+          solved: cube.isSolved(),
+          stages: rawStages,
+        };
+      }
+
+      // Проверка корректности пользовательской раскраски
+      function validateCustomCubies(customCubies) {
+        const counts = { W: 0, Y: 0, R: 0, O: 0, B: 0, G: 0, X: 0 };
+        for (const c of customCubies) {
+          for (const k of Object.keys(c.faces)) {
+            const col = c.faces[k];
+            counts[col] = (counts[col] || 0) + 1;
+          }
+        }
+
+        if (counts.X > 0) {
+          return { ok: false, message: `Остались незакрашенные клетки (${counts.X} шт.). Закрасьте все клетки в 6 цветов.` };
+        }
+        for (const col of ['W', 'Y', 'R', 'O', 'B', 'G']) {
+          if (counts[col] !== 9) {
+            return {
+              ok: false,
+              message: `Цвет «${COLORS[col].name}» использован ${counts[col]} раз(а), а на правильном кубике каждого цвета должно быть ровно по 9 наклеек.`
+            };
+          }
+        }
+
+        const expectedEdges = new Set([
+          'GW', 'RW', 'BW', 'OW',
+          'GY', 'RY', 'BY', 'OY',
+          'GR', 'BR', 'BO', 'GO'
+        ]);
+        const seenEdges = new Set();
+
+        const expectedCorners = new Set([
+          'GRW', 'BRW', 'BOW', 'GOW',
+          'GRY', 'BRY', 'BOY', 'GOY'
+        ]);
+        const seenCorners = new Set();
+
+        for (const c of customCubies) {
+          const vals = Object.values(c.faces);
+          if (vals.length === 2) {
+            const key = [...vals].sort().join('');
+            if (!expectedEdges.has(key)) {
+              return {
+                ok: false,
+                message: `На одном из рёбер невозможная пара цветов (${COLORS[vals[0]].name} + ${COLORS[vals[1]].name}). Противоположные цвета (например Белый и Жёлтый) не могут быть на одной детали.`
+              };
+            }
+            if (seenEdges.has(key)) {
+              return {
+                ok: false,
+                message: `Ребро «${COLORS[vals[0]].name} + ${COLORS[vals[1]].name}» встретилось дважды. Проверьте наклейки на рёбрах.`
+              };
+            }
+            seenEdges.add(key);
+          } else if (vals.length === 3) {
+            const key = [...vals].sort().join('');
+            if (!expectedCorners.has(key)) {
+              return {
+                ok: false,
+                message: `Один из углов имеет невозможную комбинацию цветов (${vals.map(v => COLORS[v].name).join(' + ')}). Проверьте наклейки на углах.`
+              };
+            }
+            if (seenCorners.has(key)) {
+              return {
+                ok: false,
+                message: `Один из углов (${vals.map(v => COLORS[v].name).join(' + ')}) повторяется дважды. Проверьте цвета углов.`
+              };
+            }
+            seenCorners.add(key);
+          }
+        }
+
+        // Проверяем реальным решателем (ловит переворот ребра, перекрученный угол и перестановку двух деталей)
+        const testResult = solveBeginner(customCubies);
+        if (!testResult.solved) {
+          return {
+            ok: false,
+            message: 'Детали по цветам верные, но такой кубик невозможно собрать без разборки (один угол перекручен, ребро перевёрнуто или две детали поменяны местами). Перепроверьте наклейки с реальным кубиком!'
+          };
+        }
+
+        return { ok: true, solution: testResult.stages };
+      }
+
+      // =========================================================================
+      // 4. СОСТОЯНИЕ ПРИЛОЖЕНИЯ И ПЛЕЕРА
+      // =========================================================================
+      let cubies = createSolvedCubies();
+      let initialSolutionCubies = createSolvedCubies();
+      let timeline = []; // [{ stageIdx, moveIdx, moveCode }]
+      let stageStartCursors = [0, 0, 0, 0, 0, 0, 0];
+      let stagesData = STAGE_META.map(meta => ({ meta, moves: [] }));
+      let cursor = 0;
+
+      let currentTab = 'solve'; // 'solve' | 'paint' | 'skills'
+      let selectedStageView = 0;
+      let selectedPaintColor = 'R';
+      let prePaintSnapshot = null;
+      let preSkillSnapshot = null;
+
+      let animQueue = [];
+      let activeAnim = null;
+      let autoPlayTimer = null;
+
+      // 360° Кватернионная камера без блокировки углов (gimbal lock)
+      function quatMul(a, b) {
+        return [
+          a[3] * b[0] + a[0] * b[3] + a[1] * b[2] - a[2] * b[1],
+          a[3] * b[1] - a[0] * b[2] + a[1] * b[3] + a[2] * b[0],
+          a[3] * b[2] + a[0] * b[1] - a[1] * b[0] + a[2] * b[3],
+          a[3] * b[3] - a[0] * b[0] - a[1] * b[1] - a[2] * b[2],
+        ];
+      }
+
+      function quatNormalize(q) {
+        const len = Math.hypot(q[0], q[1], q[2], q[3]) || 1;
+        return [q[0] / len, q[1] / len, q[2] / len, q[3] / len];
+      }
+
+      function quatFromAxisAngle(ax, ay, az, angle) {
+        const half = angle * 0.5;
+        const s = Math.sin(half);
+        return [ax * s, ay * s, az * s, Math.cos(half)];
+      }
+
+      function quatToMat3(q) {
+        const x = q[0], y = q[1], z = q[2], w = q[3];
+        const xx = x * x, yy = y * y, zz = z * z;
+        const xy = x * y, xz = x * z, yz = y * z;
+        const wx = w * x, wy = w * y, wz = w * z;
+        return [
+          1 - 2 * (yy + zz), 2 * (xy - wz),     2 * (xz + wy),
+          2 * (xy + wz),     1 - 2 * (xx + zz), 2 * (yz - wx),
+          2 * (xz - wy),     2 * (yz + wx),     1 - 2 * (xx + yy),
+        ];
+      }
+
+      function quatSlerp(q1, q2, t) {
+        let dot = q1[0] * q2[0] + q1[1] * q2[1] + q1[2] * q2[2] + q1[3] * q2[3];
+        let target = q2;
+        if (dot < 0) {
+          dot = -dot;
+          target = [-q2[0], -q2[1], -q2[2], -q2[3]];
+        }
+        if (dot > 0.9995) {
+          return quatNormalize([
+            q1[0] + (target[0] - q1[0]) * t,
+            q1[1] + (target[1] - q1[1]) * t,
+            q1[2] + (target[2] - q1[2]) * t,
+            q1[3] + (target[3] - q1[3]) * t,
+          ]);
+        }
+        const theta0 = Math.acos(Math.min(1, Math.max(-1, dot)));
+        const sin0 = Math.sin(theta0);
+        const theta = theta0 * t;
+        const s0 = Math.sin(theta0 - theta) / sin0;
+        const s1 = Math.sin(theta) / sin0;
+        return [
+          q1[0] * s0 + target[0] * s1,
+          q1[1] * s0 + target[1] * s1,
+          q1[2] * s0 + target[2] * s1,
+          q1[3] * s0 + target[3] * s1,
+        ];
+      }
+
+      const DEFAULT_YAW = -0.58;
+      const DEFAULT_PITCH = 0.46;
+
+      function getPresetQuat(preset, whiteTop) {
+        let yaw = DEFAULT_YAW;
+        let pitch = DEFAULT_PITCH;
+        if (preset === 'bottom') {
+          yaw = DEFAULT_YAW;
+          pitch = -0.52;
+        } else if (preset === 'back') {
+          yaw = Math.PI + DEFAULT_YAW;
+          pitch = DEFAULT_PITCH;
+        }
+        const qYaw = quatFromAxisAngle(0, 1, 0, yaw);
+        const qPitch = quatFromAxisAngle(1, 0, 0, pitch);
+        const qView = quatMul(qPitch, qYaw);
+        if (!whiteTop) return quatNormalize(qView);
+        const qFlip = quatFromAxisAngle(0, 0, 1, Math.PI);
+        return quatNormalize(quatMul(qView, qFlip));
+      }
+
+      let activeViewPreset = 'front_top'; // 'front_top' | 'bottom' | 'back' | 'custom'
+      let flippedWhiteTop = false;
+      let camQuat = getPresetQuat('front_top', false);
+      let camMat = quatToMat3(camQuat);
+      let camAnim = null; // { from, to, progress, duration }
+      let hitStickers = [];
+
+      // =========================================================================
+      // 5. 3D CANVAS ПРОЕКЦИЯ И РИСОВАНИЕ СТРЕЛОК
+      // =========================================================================
+      const canvas = document.getElementById('cubeCanvas');
+      const ctx = canvas.getContext('2d');
+
+      function projectPoint(px, py, pz, cx, cy, scaleFactor) {
+        const m = camMat;
+        const x1 = m[0] * px + m[1] * py + m[2] * pz;
+        const y2 = m[3] * px + m[4] * py + m[5] * pz;
+        const z2 = m[6] * px + m[7] * py + m[8] * pz;
+
+        const camDist = 9.5;
+        const perspective = (camDist * scaleFactor) / (camDist - z2);
+        return { sx: cx + x1 * perspective, sy: cy - y2 * perspective, x3: x1, y3: y2, z3: z2 };
+      }
+
+      function rotatePointAngle(px, py, pz, axis, angle) {
+        const c = Math.cos(angle);
+        const s = Math.sin(angle);
+        if (axis === 'x') return [px, py * c - pz * s, py * s + pz * c];
+        if (axis === 'y') return [px * c + pz * s, py, -px * s + pz * c];
+        return [px * c - py * s, px * s + py * c, pz];
+      }
+
+      function shadeHex(hex, factor) {
+        const clean = hex.replace('#', '');
+        const r = Math.min(255, Math.max(0, Math.round(parseInt(clean.slice(0, 2), 16) * factor)));
+        const g = Math.min(255, Math.max(0, Math.round(parseInt(clean.slice(2, 4), 16) * factor)));
+        const b = Math.min(255, Math.max(0, Math.round(parseInt(clean.slice(4, 6), 16) * factor)));
+        return `rgb(${r},${g},${b})`;
+      }
+
+      const LOCAL_QUADS = {
+        px: { n: [1, 0, 0],  pts: [[1, -1, 1], [1, -1, -1], [1, 1, -1], [1, 1, 1]] },
+        nx: { n: [-1, 0, 0], pts: [[-1, -1, -1], [-1, -1, 1], [-1, 1, 1], [-1, 1, -1]] },
+        py: { n: [0, 1, 0],  pts: [[-1, 1, 1], [1, 1, 1], [1, 1, -1], [-1, 1, -1]] },
+        ny: { n: [0, -1, 0], pts: [[-1, -1, -1], [1, -1, -1], [1, -1, 1], [-1, -1, 1]] },
+        pz: { n: [0, 0, 1],  pts: [[-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]] },
+        nz: { n: [0, 0, -1], pts: [[1, -1, -1], [-1, -1, -1], [-1, 1, -1], [1, 1, -1]] },
+      };
+
+      function drawQuad(pts, fill, stroke, lineWidth) {
+        ctx.beginPath();
+        ctx.moveTo(pts[0].sx, pts[0].sy);
+        for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].sx, pts[i].sy);
+        ctx.closePath();
+        ctx.fillStyle = fill;
+        ctx.fill();
+        if (stroke) {
+          ctx.strokeStyle = stroke;
+          ctx.lineWidth = lineWidth;
+          ctx.lineJoin = 'round';
+          ctx.stroke();
+        }
+      }
+
+      function drawDirectionArrow(moveCode, cx, cy, scaleFactor) {
+        const d = MOVE_DEFS[moveCode];
+        if (!d) return;
+        const arcSign = d.axis === 'z' ? -d.dir : d.dir;
+        const radius = 2.02;
+        const offset = d.layer * 1.18;
+        const arcPts = [];
+        const segments = 18;
+        const startA = -0.78 * arcSign;
+        const endA = 0.78 * arcSign;
+
+        for (let i = 0; i <= segments; i++) {
+          const a = startA + (endA - startA) * (i / segments);
+          let p;
+          if (d.axis === 'x') p = [offset, Math.cos(a) * radius, Math.sin(a) * radius];
+          else if (d.axis === 'y') p = [Math.sin(a) * radius, offset, Math.cos(a) * radius];
+          else p = [Math.sin(a) * radius, Math.cos(a) * radius, offset];
+          arcPts.push(projectPoint(p[0], p[1], p[2], cx, cy, scaleFactor));
+        }
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(arcPts[0].sx, arcPts[0].sy);
+        for (let i = 1; i < arcPts.length; i++) ctx.lineTo(arcPts[i].sx, arcPts[i].sy);
+        ctx.strokeStyle = '#FFD500';
+        ctx.lineWidth = 5.5;
+        ctx.lineCap = 'round';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+        ctx.shadowBlur = 7;
+        ctx.stroke();
+
+        const pEnd = arcPts[arcPts.length - 1];
+        const pPrev = arcPts[arcPts.length - 3];
+        const ang2D = Math.atan2(pEnd.sy - pPrev.sy, pEnd.sx - pPrev.sx);
+        const headLen = 15;
+        ctx.beginPath();
+        ctx.moveTo(pEnd.sx, pEnd.sy);
+        ctx.lineTo(pEnd.sx - headLen * Math.cos(ang2D - 0.52), pEnd.sy - headLen * Math.sin(ang2D - 0.52));
+        ctx.lineTo(pEnd.sx - headLen * Math.cos(ang2D + 0.52), pEnd.sy - headLen * Math.sin(ang2D + 0.52));
+        ctx.closePath();
+        ctx.fillStyle = '#FFD500';
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function renderCube3D() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const rect = canvas.getBoundingClientRect();
+        const w = Math.max(300, Math.round(rect.width));
+        const h = Math.max(280, Math.round(rect.height));
+
+        if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+          canvas.width = w * dpr;
+          canvas.height = h * dpr;
+        }
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        const cx = w / 2;
+        const cy = h / 2 + 4;
+        const scaleFactor = Math.min(w, h) * 0.175;
+        const halfSize = 0.47;
+        const stickerScale = 0.80;
+
+        const animAngle = activeAnim
+          ? activeAnim.dir * (Math.PI / 2) * easeInOutCubic(activeAnim.progress)
+          : 0;
+
+        const cubieRenderList = [];
+        for (let idx = 0; idx < cubies.length; idx++) {
+          const cubie = cubies[idx];
+          const isMoving = activeAnim && cubie[activeAnim.axis] === activeAnim.layer;
+          let centerPos = [cubie.x, cubie.y, cubie.z];
+          if (isMoving) {
+            centerPos = rotatePointAngle(centerPos[0], centerPos[1], centerPos[2], activeAnim.axis, animAngle);
+          }
+          const projCenter = projectPoint(centerPos[0], centerPos[1], centerPos[2], cx, cy, scaleFactor);
+          const dx = projCenter.x3;
+          const dy = projCenter.y3;
+          const dz = projCenter.z3 - 9.5;
+          cubieRenderList.push({ idx, cubie, isMoving, distSq: dx * dx + dy * dy + dz * dz });
+        }
+
+        cubieRenderList.sort((a, b) => b.distSq - a.distSq);
+        hitStickers = [];
+
+        const p0 = projectPoint(0, 0, 0, cx, cy, scaleFactor);
+
+        for (const item of cubieRenderList) {
+          const { idx, cubie, isMoving } = item;
+          const faceDraws = [];
+
+          for (const fKey of Object.keys(LOCAL_QUADS)) {
+            const quad = LOCAL_QUADS[fKey];
+            let n = quad.n;
+            if (isMoving) n = rotatePointAngle(n[0], n[1], n[2], activeAnim.axis, animAngle);
+
+            const pn = projectPoint(n[0], n[1], n[2], cx, cy, scaleFactor);
+            const nxCam = pn.x3 - p0.x3;
+            const nyCam = pn.y3 - p0.y3;
+            const nzCam = pn.z3 - p0.z3;
+
+            let fc = [
+              cubie.x + quad.n[0] * halfSize,
+              cubie.y + quad.n[1] * halfSize,
+              cubie.z + quad.n[2] * halfSize,
+            ];
+            if (isMoving) fc = rotatePointAngle(fc[0], fc[1], fc[2], activeAnim.axis, animAngle);
+            const fcCam = projectPoint(fc[0], fc[1], fc[2], cx, cy, scaleFactor);
+
+            const toCamX = -fcCam.x3;
+            const toCamY = -fcCam.y3;
+            const toCamZ = 9.5 - fcCam.z3;
+            if (nxCam * toCamX + nyCam * toCamY + nzCam * toCamZ <= 0.01) continue;
+
+            faceDraws.push({
+              fKey,
+              quad,
+              nxCam,
+              nyCam,
+              nzCam,
+              faceDistSq: toCamX * toCamX + toCamY * toCamY + toCamZ * toCamZ,
+            });
+          }
+
+          faceDraws.sort((a, b) => b.faceDistSq - a.faceDistSq);
+
+          for (const fd of faceDraws) {
+            const bodyPts2D = fd.quad.pts.map(pt => {
+              let wp = [
+                cubie.x + pt[0] * halfSize,
+                cubie.y + pt[1] * halfSize,
+                cubie.z + pt[2] * halfSize,
+              ];
+              if (isMoving) wp = rotatePointAngle(wp[0], wp[1], wp[2], activeAnim.axis, animAngle);
+              return projectPoint(wp[0], wp[1], wp[2], cx, cy, scaleFactor);
+            });
+
+            drawQuad(bodyPts2D, '#080b11', '#04060a', 1.4);
+
+            const colorCode = cubie.faces[fd.fKey];
+            if (colorCode) {
+              const stickerPts2D = fd.quad.pts.map(pt => {
+                const sPt = [
+                  fd.quad.n[0] !== 0 ? pt[0] * 1.008 : pt[0] * stickerScale,
+                  fd.quad.n[1] !== 0 ? pt[1] * 1.008 : pt[1] * stickerScale,
+                  fd.quad.n[2] !== 0 ? pt[2] * 1.008 : pt[2] * stickerScale,
+                ];
+                let wp = [
+                  cubie.x + sPt[0] * halfSize,
+                  cubie.y + sPt[1] * halfSize,
+                  cubie.z + sPt[2] * halfSize,
+                ];
+                if (isMoving) wp = rotatePointAngle(wp[0], wp[1], wp[2], activeAnim.axis, animAngle);
+                return projectPoint(wp[0], wp[1], wp[2], cx, cy, scaleFactor);
+              });
+
+              const lightDot = fd.nxCam * 0.25 + fd.nyCam * 0.65 + fd.nzCam * 0.45;
+              const shade = Math.min(1.03, Math.max(0.87, 0.94 + lightDot * 0.09));
+              drawQuad(stickerPts2D, shadeHex(COLORS[colorCode].hex, shade), '#04060a', 2.5);
+
+              hitStickers.push({ pts: stickerPts2D, cubieIdx: idx, faceKey: fd.fKey });
+            }
+          }
+        }
+
+        drawFaceLabels(cx, cy, scaleFactor, p0);
+
+        if (activeAnim) {
+          drawDirectionArrow(activeAnim.code, cx, cy, scaleFactor);
+        } else if (currentTab === 'solve' && cursor < timeline.length) {
+          // Подсвечиваем стрелкой следующий шаг плеера прямо в ожидании клика!
+          drawDirectionArrow(timeline[cursor].moveCode, cx, cy, scaleFactor);
+        }
+      }
+
+      function drawFaceLabels(cx, cy, scaleFactor, p0) {
+        const labels = [
+          { text: 'ВЕРХ',  pos: [0, 1.88, 0],  n: [0, 1, 0] },
+          { text: 'ПЕРЕД', pos: [0, 0, 1.88],  n: [0, 0, 1] },
+          { text: 'ПРАВО', pos: [1.88, 0, 0],  n: [1, 0, 0] },
+          { text: 'ЛЕВО',  pos: [-1.88, 0, 0], n: [-1, 0, 0] },
+          { text: 'НИЗ',   pos: [0, -1.88, 0], n: [0, -1, 0] },
+          { text: 'ЗАД',   pos: [0, 0, -1.88], n: [0, 0, -1] },
+        ];
+        ctx.save();
+        ctx.font = '700 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        for (const item of labels) {
+          const pn = projectPoint(item.n[0], item.n[1], item.n[2], cx, cy, scaleFactor);
+          if (pn.z3 - p0.z3 < 0.14) continue;
+          const p = projectPoint(item.pos[0], item.pos[1], item.pos[2], cx, cy, scaleFactor);
+          const tw = ctx.measureText(item.text).width + 12;
+          ctx.fillStyle = 'rgba(11, 18, 32, 0.85)';
+          ctx.beginPath();
+          ctx.roundRect(p.sx - tw / 2, p.sy - 10, tw, 20, 5);
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.fillStyle = '#e2e8f0';
+          ctx.fillText(item.text, p.sx, p.sy);
+        }
+        ctx.restore();
+      }
+
+      function easeInOutCubic(t) {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      }
+
+      // =========================================================================
+      // 6. АНИМАЦИЯ ПОВОРОТОВ
+      // =========================================================================
+      let lastFrameTs = 0;
+      let rafRunning = false;
+
+      function startAnimLoop() {
+        if (rafRunning) return;
+        rafRunning = true;
+        lastFrameTs = performance.now();
+        requestAnimationFrame(tick);
+      }
+
+      function tick(now) {
+        const dt = Math.min((now - lastFrameTs) / 1000, 0.05);
+        lastFrameTs = now;
+
+        if (camAnim) {
+          camAnim.progress = Math.min(1, camAnim.progress + dt / camAnim.duration);
+          const eased = easeInOutCubic(camAnim.progress);
+          camQuat = quatSlerp(camAnim.from, camAnim.to, eased);
+          camMat = quatToMat3(camQuat);
+          if (camAnim.progress >= 1) {
+            camQuat = camAnim.to;
+            camMat = quatToMat3(camQuat);
+            camAnim = null;
+          }
+        }
+
+        if (!activeAnim && animQueue.length > 0) {
+          activeAnim = animQueue.shift();
+          activeAnim.progress = 0;
+          const d = MOVE_DEFS[activeAnim.code];
+          if (d) {
+            document.getElementById('cueBadge').textContent = d.arrow;
+            document.getElementById('cueText').textContent = d.words;
+          }
+        }
+
+        if (activeAnim) {
+          activeAnim.progress = Math.min(1, activeAnim.progress + dt / activeAnim.duration);
+          renderCube3D();
+          if (activeAnim.progress >= 1) {
+            applyMoveToCubies(cubies, activeAnim.code);
+            const onDone = activeAnim.onDone;
+            activeAnim = null;
+            renderCube3D();
+            render2DNet();
+            if (onDone) onDone();
+          }
+          requestAnimationFrame(tick);
+        } else if (camAnim) {
+          renderCube3D();
+          requestAnimationFrame(tick);
+        } else {
+          rafRunning = false;
+          renderCube3D();
+        }
+      }
+
+      function animateMove(code, duration = 0.34, onDone = null) {
+        const d = MOVE_DEFS[code];
+        if (!d) return;
+        animQueue.push({
+          code,
+          axis: d.axis,
+          layer: d.layer,
+          dir: d.dir,
+          duration,
+          progress: 0,
+          onDone,
+        });
+        startAnimLoop();
+      }
+
+      function stopAutoPlay() {
+        if (autoPlayTimer) {
+          clearInterval(autoPlayTimer);
+          autoPlayTimer = null;
+        }
+        const btn = document.getElementById('btnAutoPlayStage');
+        btn.textContent = '▶ Проиграть весь этап автоматически (1 ход/сек)';
+      }
+
+      // =========================================================================
+      // 7. 2D РАЗВЁРТКА
+      // =========================================================================
+      const NET_LAYOUT = [
+        { key: 'py', title: 'ВЕРХ',  col: 2, row: 1, map: (r, c) => [c - 1, 1, r - 1] },
+        { key: 'nx', title: 'ЛЕВО',  col: 1, row: 2, map: (r, c) => [-1, 1 - r, c - 1] },
+        { key: 'pz', title: 'ПЕРЕД', col: 2, row: 2, map: (r, c) => [c - 1, 1 - r, 1] },
+        { key: 'px', title: 'ПРАВО', col: 3, row: 2, map: (r, c) => [1, 1 - r, 1 - c] },
+        { key: 'nz', title: 'ЗАД',   col: 4, row: 2, map: (r, c) => [1 - c, 1 - r, -1] },
+        { key: 'ny', title: 'НИЗ',   col: 2, row: 3, map: (r, c) => [c - 1, -1, 1 - r] },
+      ];
+
+      function isCenterCubie(cubie) {
+        return Math.abs(cubie.x) + Math.abs(cubie.y) + Math.abs(cubie.z) === 1;
+      }
+
+      function render2DNet() {
+        const grid = document.getElementById('netGrid');
+        grid.innerHTML = '';
+
+        for (const face of NET_LAYOUT) {
+          const wrap = document.createElement('div');
+          wrap.className = 'face-wrap';
+          wrap.style.gridColumn = String(face.col);
+          wrap.style.gridRow = String(face.row);
+
+          const label = document.createElement('div');
+          label.className = 'face-label';
+          label.textContent = face.title;
+          wrap.appendChild(label);
+
+          const matrix = document.createElement('div');
+          matrix.className = 'face-3x3';
+
+          for (let r = 0; r < 3; r++) {
+            for (let c = 0; c < 3; c++) {
+              const [cx, cy, cz] = face.map(r, c);
+              const cubieIdx = cubies.findIndex(cb => cb.x === cx && cb.y === cy && cb.z === cz);
+              const cubie = cubies[cubieIdx];
+              const colorCode = cubie && cubie.faces[face.key] ? cubie.faces[face.key] : 'X';
+              const locked = cubie && isCenterCubie(cubie);
+
+              const tile = document.createElement('button');
+              tile.type = 'button';
+              tile.className = 'net-tile' + (currentTab === 'paint' && locked ? ' center-locked' : '');
+              tile.style.backgroundColor = COLORS[colorCode].hex;
+              tile.title = locked
+                ? `${face.title} (центр зафиксирован: ${COLORS[colorCode].name})`
+                : `${face.title}: ${COLORS[colorCode].name}`;
+
+              tile.addEventListener('click', () => {
+                if (currentTab !== 'paint' || locked) return;
+                paintSticker(cubieIdx, face.key);
+              });
+
+              matrix.appendChild(tile);
+            }
+          }
+
+          wrap.appendChild(matrix);
+          grid.appendChild(wrap);
+        }
+
+        if (currentTab === 'paint') {
+          updateColorCounts();
+        }
+      }
+
+      // =========================================================================
+      // 8. ПОСТРОЕНИЕ РЕШЕНИЯ И ПОШАГОВЫЙ ПЛЕЕР
+      // =========================================================================
+      function buildSolutionFromCurrentCube() {
+        stopAutoPlay();
+        animQueue = [];
+        activeAnim = null;
+
+        initialSolutionCubies = cloneCubies(cubies);
+        const res = solveBeginner(cubies);
+        stagesData = res.stages;
+
+        timeline = [];
+        stageStartCursors = [];
+        for (let sIdx = 0; sIdx < stagesData.length; sIdx++) {
+          stageStartCursors[sIdx] = timeline.length;
+          const moves = stagesData[sIdx].moves;
+          for (let mIdx = 0; mIdx < moves.length; mIdx++) {
+            timeline.push({ stageIdx: sIdx, moveIdx: mIdx, moveCode: moves[mIdx] });
+          }
+        }
+        cursor = 0;
+        // Открываем первый непустой этап
+        const firstNonEmpty = stagesData.findIndex(s => s.moves.length > 0);
+        selectedStageView = firstNonEmpty >= 0 ? firstNonEmpty : 0;
+
+        renderPlayerUI();
+        renderCube3D();
+        render2DNet();
+      }
+
+      function jumpToCursor(targetCursor, preferredStageView = null) {
+        stopAutoPlay();
+        animQueue = [];
+        activeAnim = null;
+
+        const clamped = Math.max(0, Math.min(timeline.length, targetCursor));
+        cubies = cloneCubies(initialSolutionCubies);
+        for (let i = 0; i < clamped; i++) {
+          applyMoveToCubies(cubies, timeline[i].moveCode);
+        }
+        cursor = clamped;
+        if (preferredStageView !== null) {
+          selectedStageView = preferredStageView;
+        } else if (cursor < timeline.length) {
+          selectedStageView = timeline[cursor].stageIdx;
+        } else {
+          selectedStageView = 6;
+        }
+        renderPlayerUI();
+        renderCube3D();
+        render2DNet();
+      }
+
+      function stepForwardOne() {
+        if (activeAnim || animQueue.length > 0 || cursor >= timeline.length) return;
+        const item = timeline[cursor];
+        cursor++;
+        selectedStageView = cursor < timeline.length ? timeline[cursor].stageIdx : 6;
+
+        animateMove(item.moveCode, 0.36, () => {
+          renderPlayerUI();
+        });
+        renderPlayerUI();
+      }
+
+      function stepBackwardOne() {
+        if (activeAnim || animQueue.length > 0 || cursor <= 0) return;
+        cursor--;
+        const item = timeline[cursor];
+        selectedStageView = item.stageIdx;
+        const inv = INVERSE_MOVE[item.moveCode];
+
+        animateMove(inv, 0.30, () => {
+          renderPlayerUI();
+        });
+        renderPlayerUI();
+      }
+
+      function renderPlayerUI() {
+        const total = timeline.length;
+        document.getElementById('totalProgressLabel').textContent = `Ход ${cursor} из ${total}`;
+
+        // 7 табов этапов
+        const stageTabs = document.getElementById('stageTabs');
+        stageTabs.innerHTML = '';
+        for (let i = 0; i < STAGE_META.length; i++) {
+          const startC = stageStartCursors[i];
+          const endC = startC + stagesData[i].moves.length;
+          const isDone = cursor >= endC && (total > 0 || new SimCube(cubies).isSolved());
+          const isActive = i === selectedStageView;
+
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'stage-pill' + (isActive ? ' active' : isDone ? ' done' : '');
+          btn.textContent = String(i + 1);
+          btn.title = STAGE_META[i].title;
+          btn.addEventListener('click', () => {
+            jumpToCursor(stageStartCursors[i], i);
+          });
+          stageTabs.appendChild(btn);
+        }
+
+        const st = stagesData[selectedStageView];
+        const stStart = stageStartCursors[selectedStageView];
+        const stMoves = st.moves;
+
+        document.getElementById('stageKicker').textContent = `Этап ${selectedStageView + 1} из 7`;
+        document.getElementById('stageTitle').textContent = st.meta.title;
+        document.getElementById('stageExplain').textContent = st.meta.explain;
+        document.getElementById('stageMoveCount').textContent =
+          stMoves.length === 0 ? 'Уже собран!' : `${stMoves.length} ход(ов)`;
+
+        // Чипсы ходов этого этапа
+        const chipsBox = document.getElementById('stageMovesChips');
+        chipsBox.innerHTML = '';
+        if (stMoves.length === 0) {
+          const emptyNote = document.createElement('span');
+          emptyNote.className = 'meta-line';
+          emptyNote.textContent = 'Этот этап уже выполнен для текущего кубика — переходите к следующему номеру выше.';
+          chipsBox.appendChild(emptyNote);
+        } else {
+          stMoves.forEach((m, idx) => {
+            const absIdx = stStart + idx;
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className =
+              'move-chip' + (absIdx < cursor ? ' done' : absIdx === cursor ? ' current' : '');
+            chip.textContent = m;
+            chip.title = MOVE_DEFS[m].words;
+            chip.addEventListener('click', () => jumpToCursor(absIdx));
+            chipsBox.appendChild(chip);
+          });
+        }
+
+        const isFullySolved = cursor >= total && new SimCube(cubies).isSolved();
+        document.getElementById('solvedBanner').classList.toggle('hidden', !isFullySolved);
+
+        const cueBadge = document.getElementById('cueBadge');
+        const cueText = document.getElementById('cueText');
+        const spokenText = document.getElementById('spokenMoveText');
+        const spokenSub = document.getElementById('spokenMoveSub');
+        const spokenBadge = document.getElementById('spokenMoveBadge');
+
+        if (cursor < total) {
+          const nextItem = timeline[cursor];
+          const def = MOVE_DEFS[nextItem.moveCode];
+          spokenText.textContent = `Следующий ход: ${def.words}`;
+          spokenSub.textContent = `Этап ${nextItem.stageIdx + 1} · ход ${nextItem.moveIdx + 1} из ${stagesData[nextItem.stageIdx].moves.length}`;
+          spokenBadge.textContent = def.arrow;
+          if (!activeAnim) {
+            cueBadge.textContent = def.arrow;
+            cueText.textContent = `Далее: ${def.words}`;
+          }
+        } else if (isFullySolved) {
+          spokenText.textContent = 'Кубик полностью собран!';
+          spokenSub.textContent = 'Все 6 сторон одного цвета.';
+          spokenBadge.textContent = '✓';
+          if (!activeAnim) {
+            cueBadge.textContent = '✓';
+            cueText.textContent = 'Поздравляем! Сборка завершена.';
+          }
+        } else {
+          spokenText.textContent = 'Ходов нет';
+          spokenSub.textContent = 'Нажмите «Перемешать и решить» или задайте свой кубик.';
+          spokenBadge.textContent = '—';
+        }
+
+        document.getElementById('btnStepBack').disabled = cursor <= 0;
+        document.getElementById('btnStepForward').disabled = cursor >= total;
+        document.getElementById('btnAutoPlayStage').disabled = cursor >= total;
+      }
+
+      // =========================================================================
+      // 9. РЕЖИМ РАСКРАСКИ «ЗАДАТЬ СВОЙ КУБИК»
+      // =========================================================================
+      function paintSticker(cubieIdx, faceKey) {
+        if (cubieIdx < 0 || !cubies[cubieIdx] || isCenterCubie(cubies[cubieIdx])) return;
+        cubies[cubieIdx].faces[faceKey] = selectedPaintColor;
+        document.getElementById('paintErrorBox').classList.add('hidden');
+        renderCube3D();
+        render2DNet();
+      }
+
+      function renderPalette() {
+        const grid = document.getElementById('paletteGrid');
+        grid.innerHTML = '';
+        for (const code of ['W', 'Y', 'R', 'O', 'B', 'G']) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'swatch-btn' + (selectedPaintColor === code ? ' selected' : '');
+          btn.innerHTML = `<span class="swatch-dot" style="background:${COLORS[code].hex}"></span><span>${COLORS[code].name}</span>`;
+          btn.addEventListener('click', () => {
+            selectedPaintColor = code;
+            renderPalette();
+          });
+          grid.appendChild(btn);
+        }
+      }
+
+      function updateColorCounts() {
+        const counts = { W: 0, Y: 0, R: 0, O: 0, B: 0, G: 0 };
+        for (const cubie of cubies) {
+          for (const k of Object.keys(cubie.faces)) {
+            const c = cubie.faces[k];
+            if (counts[c] !== undefined) counts[c]++;
+          }
+        }
+        const strip = document.getElementById('colorCounts');
+        strip.innerHTML = ['W', 'Y', 'R', 'O', 'B', 'G']
+          .map(code => {
+            const cnt = counts[code];
+            return `<span class="${cnt === 9 ? 'count-ok' : 'count-warn'}">${COLORS[code].name}: ${cnt}/9</span>`;
+          })
+          .join('');
+      }
+
+      // =========================================================================
+      // 10. ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК И БАЗА ПРИЁМОВ
+      // =========================================================================
+      function switchTab(tab) {
+        if (activeAnim || animQueue.length > 0) return;
+        stopAutoPlay();
+
+        if (currentTab === 'skills' && tab !== 'skills' && preSkillSnapshot) {
+          cubies = cloneCubies(preSkillSnapshot);
+          preSkillSnapshot = null;
+        }
+
+        currentTab = tab;
+        document.getElementById('tabSolve').classList.toggle('active', tab === 'solve');
+        document.getElementById('tabPaint').classList.toggle('active', tab === 'paint');
+        document.getElementById('tabSkills').classList.toggle('active', tab === 'skills');
+
+        document.getElementById('panelSolve').classList.toggle('hidden', tab !== 'solve');
+        document.getElementById('panelPaint').classList.toggle('hidden', tab !== 'paint');
+        document.getElementById('panelSkills').classList.toggle('hidden', tab !== 'skills');
+
+        document.getElementById('manualTurnsSection').classList.toggle('hidden', tab !== 'solve');
+        document.getElementById('netContainer').classList.toggle('paint-mode', tab === 'paint');
+        document.getElementById('netPaintHint').classList.toggle('hidden', tab !== 'paint');
+
+        if (tab === 'paint') {
+          prePaintSnapshot = cloneCubies(cubies);
+          document.getElementById('paintErrorBox').classList.add('hidden');
+          document.getElementById('cueBadge').textContent = '✎';
+          document.getElementById('cueText').textContent = 'Режим раскраски: кликайте по клеткам 2D-развёртки или 3D-кубика';
+          renderPalette();
+        } else if (tab === 'skills') {
+          preSkillSnapshot = cloneCubies(cubies);
+          cubies = createSolvedCubies();
+          document.getElementById('cueBadge').textContent = '★';
+          document.getElementById('cueText').textContent = 'Выберите приём справа, чтобы увидеть анимацию';
+        } else {
+          renderPlayerUI();
+        }
+
+        renderCube3D();
+        render2DNet();
+      }
+
+      const SKILL_DEMOS = {
+        right_pif: ['R', 'U', "R'", "U'"],
+        left_pif:  ["L'", "U'", 'L', 'U'],
+        fish:      ['R', 'U', "R'", 'U', 'R', 'U', 'U', "R'", 'U'],
+      };
+
+      // =========================================================================
+      // 11. СОБЫТИЯ МЫШИ/ПАЛЬЦА НА 3D ХОЛСТЕ И КНОПКИ
+      // =========================================================================
+      function pointInPolygon(x, y, poly) {
+        let inside = false;
+        for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+          const xi = poly[i].sx, yi = poly[i].sy;
+          const xj = poly[j].sx, yj = poly[j].sy;
+          const intersect = (yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi + 1e-9) + xi;
+          if (intersect) inside = !inside;
+        }
+        return inside;
+      }
+
+      function updateCameraButtonsUI() {
+        document.getElementById('btnViewFrontTop').classList.toggle('active', activeViewPreset === 'front_top');
+        document.getElementById('btnViewBottom').classList.toggle('active', activeViewPreset === 'bottom');
+        document.getElementById('btnViewBack').classList.toggle('active', activeViewPreset === 'back');
+
+        const flipBtn = document.getElementById('btnFlipTopColor');
+        flipBtn.textContent = flippedWhiteTop
+          ? 'Перевернуть жёлтым вверх'
+          : 'Перевернуть белым вверх';
+        flipBtn.classList.toggle('flipped-white', flippedWhiteTop);
+
+        const meta = document.getElementById('cubeOrientationMeta');
+        meta.textContent = flippedWhiteTop
+          ? 'Сверху: Белый · Спереди: Красный · Справа: Синий · Крутите 360° мышкой или пальцем'
+          : 'Сверху: Жёлтый · Спереди: Красный · Справа: Зелёный · Крутите 360° мышкой или пальцем';
+      }
+
+      function animateCameraToPreset(preset, whiteTop) {
+        activeViewPreset = preset;
+        flippedWhiteTop = whiteTop;
+        updateCameraButtonsUI();
+        camAnim = {
+          from: [...camQuat],
+          to: getPresetQuat(preset, whiteTop),
+          progress: 0,
+          duration: 0.34,
+        };
+        startAnimLoop();
+      }
+
+      let isDragging = false;
+      let dragStartX = 0;
+      let dragStartY = 0;
+      let dragMoved = false;
+
+      canvas.addEventListener('pointerdown', e => {
+        isDragging = true;
+        dragMoved = false;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        camAnim = null;
+        canvas.setPointerCapture(e.pointerId);
+      });
+
+      canvas.addEventListener('pointermove', e => {
+        if (!isDragging) return;
+        const dx = e.clientX - dragStartX;
+        const dy = e.clientY - dragStartY;
+        if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragMoved = true;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        if (dx !== 0 || dy !== 0) {
+          const qYaw = quatFromAxisAngle(0, 1, 0, dx * 0.009);
+          const qPitch = quatFromAxisAngle(1, 0, 0, dy * 0.009);
+          camQuat = quatNormalize(quatMul(quatMul(qPitch, qYaw), camQuat));
+          camMat = quatToMat3(camQuat);
+          if (dragMoved && activeViewPreset !== 'custom') {
+            activeViewPreset = 'custom';
+            updateCameraButtonsUI();
+          }
+          renderCube3D();
+        }
+      });
+
+      canvas.addEventListener('pointerup', e => {
+        if (!isDragging) return;
+        isDragging = false;
+        if (!dragMoved && currentTab === 'paint') {
+          const rect = canvas.getBoundingClientRect();
+          const mx = e.clientX - rect.left;
+          const my = e.clientY - rect.top;
+          for (let i = hitStickers.length - 1; i >= 0; i--) {
+            const st = hitStickers[i];
+            if (pointInPolygon(mx, my, st.pts)) {
+              paintSticker(st.cubieIdx, st.faceKey);
+              break;
+            }
+          }
+        }
+      });
+
+      document.getElementById('tabSolve').addEventListener('click', () => switchTab('solve'));
+      document.getElementById('tabPaint').addEventListener('click', () => switchTab('paint'));
+      document.getElementById('tabSkills').addEventListener('click', () => switchTab('skills'));
+
+      document.getElementById('btnViewFrontTop').addEventListener('click', () => {
+        animateCameraToPreset('front_top', flippedWhiteTop);
+      });
+
+      document.getElementById('btnViewBottom').addEventListener('click', () => {
+        animateCameraToPreset('bottom', flippedWhiteTop);
+      });
+
+      document.getElementById('btnViewBack').addEventListener('click', () => {
+        animateCameraToPreset('back', flippedWhiteTop);
+      });
+
+      document.getElementById('btnFlipTopColor').addEventListener('click', () => {
+        const nextPreset = activeViewPreset === 'custom' ? 'front_top' : activeViewPreset;
+        animateCameraToPreset(nextPreset, !flippedWhiteTop);
+      });
+
+      document.getElementById('btnScrambleSolve').addEventListener('click', () => {
+        if (activeAnim || animQueue.length > 0) return;
+        if (currentTab !== 'solve') switchTab('solve');
+        cubies = createSolvedCubies();
+        const pool = Object.keys(MOVE_DEFS);
+        let lastAxis = '';
+        for (let i = 0; i < 20; i++) {
+          let code = pool[Math.floor(Math.random() * pool.length)];
+          while (MOVE_DEFS[code].axis === lastAxis) {
+            code = pool[Math.floor(Math.random() * pool.length)];
+          }
+          lastAxis = MOVE_DEFS[code].axis;
+          applyMoveToCubies(cubies, code);
+        }
+        buildSolutionFromCurrentCube();
+      });
+
+      document.getElementById('btnResetSolved').addEventListener('click', () => {
+        if (activeAnim || animQueue.length > 0) return;
+        stopAutoPlay();
+        cubies = createSolvedCubies();
+        if (currentTab === 'paint') {
+          renderCube3D();
+          render2DNet();
+        } else {
+          if (currentTab !== 'solve') switchTab('solve');
+          buildSolutionFromCurrentCube();
+        }
+      });
+
+      document.getElementById('btnSolveCurrent').addEventListener('click', () => {
+        if (activeAnim || animQueue.length > 0) return;
+        buildSolutionFromCurrentCube();
+      });
+
+      document.querySelectorAll('.mini-move-btn[data-move]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (activeAnim || animQueue.length > 0) return;
+          stopAutoPlay();
+          const m = btn.getAttribute('data-move');
+          animateMove(m, 0.25, () => {
+            buildSolutionFromCurrentCube();
+          });
+        });
+      });
+
+      document.getElementById('btnStepForward').addEventListener('click', () => {
+        stopAutoPlay();
+        stepForwardOne();
+      });
+
+      document.getElementById('btnStepBack').addEventListener('click', () => {
+        stopAutoPlay();
+        stepBackwardOne();
+      });
+
+      document.getElementById('btnAutoPlayStage').addEventListener('click', () => {
+        if (autoPlayTimer) {
+          stopAutoPlay();
+          return;
+        }
+        if (cursor >= timeline.length) return;
+
+        const targetStage = timeline[cursor].stageIdx;
+        const stageEnd = stageStartCursors[targetStage] + stagesData[targetStage].moves.length;
+        document.getElementById('btnAutoPlayStage').textContent = '⏸ Пауза';
+
+        stepForwardOne();
+        autoPlayTimer = setInterval(() => {
+          if (cursor >= stageEnd || cursor >= timeline.length) {
+            stopAutoPlay();
+            return;
+          }
+          if (!activeAnim && animQueue.length === 0) {
+            stepForwardOne();
+          }
+        }, 950);
+      });
+
+      document.getElementById('btnSolveCustom').addEventListener('click', () => {
+        const res = validateCustomCubies(cubies);
+        const errBox = document.getElementById('paintErrorBox');
+        if (!res.ok) {
+          errBox.textContent = res.message;
+          errBox.classList.remove('hidden');
+          return;
+        }
+        errBox.classList.add('hidden');
+        prePaintSnapshot = null;
+        switchTab('solve');
+        buildSolutionFromCurrentCube();
+      });
+
+      document.getElementById('btnClearToCenters').addEventListener('click', () => {
+        for (const cubie of cubies) {
+          if (!isCenterCubie(cubie)) {
+            for (const k of Object.keys(cubie.faces)) {
+              cubie.faces[k] = 'X';
+            }
+          }
+        }
+        document.getElementById('paintErrorBox').classList.add('hidden');
+        renderCube3D();
+        render2DNet();
+      });
+
+      document.getElementById('btnCancelPaint').addEventListener('click', () => {
+        if (prePaintSnapshot) cubies = cloneCubies(prePaintSnapshot);
+        switchTab('solve');
+      });
+
+      document.querySelectorAll('.skill-play-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (activeAnim || animQueue.length > 0) return;
+          const key = btn.getAttribute('data-skill');
+          const seq = SKILL_DEMOS[key];
+          if (!seq) return;
+          cubies = createSolvedCubies();
+          renderCube3D();
+          render2DNet();
+          for (const m of seq) {
+            animateMove(m, 0.72);
+          }
+        });
+      });
+
+      window.addEventListener('resize', renderCube3D);
+
+      // =========================================================================
+      // 12. ПЕРВЫЙ ЗАПУСК: НАГЛЯДНЫЙ ПЕРЕМЕШАННЫЙ КУБИК С ГОТОВЫМ РЕШЕНИЕМ
+      // =========================================================================
+      const starterScramble = ['R', 'U', "F'", 'L', 'D', "R'", 'B', "U'", 'F', 'R', 'U', "L'"];
+      for (const m of starterScramble) {
+        applyMoveToCubies(cubies, m);
+      }
+      buildSolutionFromCurrentCube();
+    })();
+  </script>
+</body>
+</html>
